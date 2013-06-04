@@ -1,9 +1,10 @@
 #file: polyxtal.py
 
 from fipy import *
-def polyxtal(n=200):
+import numpy as np
+def Polyxtal(ncell=200**2):
     dx = dy = 0.025
-    nx = ny = n
+    nx = ny = int(np.sqrt(ncell))
  
     mesh = Grid2D(dx=dx, dy=dy, nx=nx, ny=ny)
 
@@ -91,8 +92,11 @@ def polyxtal(n=200):
     save_interval = 0.002
     save_at = save_interval
 
-    while elapsed < total_time:
-        print 'elapsed',elapsed
+    totalStep = 10
+    step = 0
+    while elapsed < total_time and step < totalStep:
+        step += 1
+       # print step
         if elapsed > 0.3:
             q.value = 100
         phase.updateOld()

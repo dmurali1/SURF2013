@@ -1,10 +1,17 @@
-def getProfileStats(importFile, nx=100, regenerate=False):
-    import cProfile
-    import os 
-    filename = "data/{func_name}{nx}.stats".format(func_name=importFile.func_name, nx=nx)
+#file: profiling_functions.py
+
+from fipy import Grid1D, CellVariable, TransientTerm, DiffusionTerm, Viewer
+import cProfile
+import pstats 
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+def getProfileStats(importFile, ncell=100, regenerate=False):
+    filename = "data/{importFile}{ncell}.stats".format(importFile=importFile, ncell=ncell)
     if not os.path.exists(filename) or regenerate:
-        ## cProfile.run('{func_name}(nx={nx})'.format(func_name=importFile.func_name, nx=nx), filename=filename)
-        cProfile.runctx('importFile(nx={nx})'.format(nx=nx), globals=globals(), locals=locals(), filename=filename)
+        importFileString = 'importFile(ncell={ncell})'.format(ncell=ncell)
+        cProfile.runctx(importFileString, globals(), locals(), filename=filename)
     return pstats.Stats(filename)
        
        
@@ -14,8 +21,8 @@ def getKey(statsDict, fcnName):
             return k
 
 
-def getFcnStats(importFile, nx=100, fcnName=None, regenerate=False):
-    a  = getProfileStats(importFile, nx, regenerate=regenerate)
+def getFcnStats(importFile, ncell=100, fcnName=None, regenerate=False):
+    a  = getProfileStats(importFile, ncell, regenerate=regenerate)
     if fcnName:
         return a.stats[getKey(a.stats, fcnName)][3]
     else:
@@ -23,23 +30,20 @@ def getFcnStats(importFile, nx=100, fcnName=None, regenerate=False):
         return a.stats[a.fcn_list[0]][3]
 
 
-def plotStats(importFile, fcnName=None, regenerate=False):
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    step = 0
-    while step < 1:
-       nxs = np.array(logspace(1, 3, 100), dtype=int)
-       allTimes = []
-       times = []
-       for nx in nxs:
-            allTimes.append(getFcnStats(importFile, nx=nx, regenerate=regenerate))
-            times.append(getFcnStats(importFile, nx=nx, fcnName=fcnName, regenerate=regenerate))
-       step += 1
+def plotStats(importFile, ncells, fcnName=None, regenerate=False):
+  
+    allTimes = []
+    times = []
+    for ncell in ncells:
+        print ncell
     
-       p1 = plt.loglog(nxs, allTimes)
-       p2 = plt.loglog(nxs, times)
-       plt.xlabel("nx values")
-       plt.ylabel("time")
-       plt.legend( (p1[0], p2[0]), ('Full Profile', fcnName) )
-       plt.show()
+        allTimes.append(getFcnStats(importFile, ncell=ncell, regenerate=regenerate))  
+        times.append(getFcnStats(importFile, ncell=ncell, fcnName=fcnName, regenerate=regenerate))
+    
+
+    p1 = plt.loglog(ncells, allTimes)      
+    plt.xlabel("ncell values")
+    plt.ylabel("time")
+    p2 = plt.loglog(ncells, times)
+    plt.legend( (p1[0], p2[0]), ('Full Profile', fcnName) )
+    plt.show()

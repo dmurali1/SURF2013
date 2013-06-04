@@ -1,6 +1,8 @@
-def Coupled(nx=100):
+from fipy import Grid1D, CellVariable, TransientTerm, DiffusionTerm, Viewer
 
-    m = Grid1D(nx=nx, Lx=1.)
+def Coupled(ncell=100):
+
+    m = Grid1D(nx=ncell, Lx=1.)
 
            
     v = CellVariable(mesh=m, hasOld=True, value=[[0.5], [0.5]], elementshape=(2,))
