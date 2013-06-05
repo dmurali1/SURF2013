@@ -6,9 +6,10 @@ import pstats
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 def getProfileStats(importFile, ncell=100, regenerate=False):
-    filename = "data/{importFile}{ncell}.stats".format(importFile=importFile, ncell=ncell)
+    filename = "data/{importFile}{ncell}.stats".format(importFile=importFile.func_name, ncell=ncell)
     if not os.path.exists(filename) or regenerate:
         importFileString = 'importFile(ncell={ncell})'.format(ncell=ncell)
         cProfile.runctx(importFileString, globals(), locals(), filename=filename)
@@ -31,19 +32,27 @@ def getFcnStats(importFile, ncell=100, fcnName=None, regenerate=False):
 
 
 def plotStats(importFile, ncells, fcnName=None, regenerate=False):
-  
     allTimes = []
     times = []
     for ncell in ncells:
-        print ncell
+        print ncell,
     
         allTimes.append(getFcnStats(importFile, ncell=ncell, regenerate=regenerate))  
         times.append(getFcnStats(importFile, ncell=ncell, fcnName=fcnName, regenerate=regenerate))
     
+    p0 = plt.loglog(ncells, .30 * ncells**2, label = "$n^2$")
+    p2 =  plt.loglog(ncells, .90 * (ncells * np.log(ncells)), label = "$n\log(n)$")
+    p1 = plt.loglog(ncells, allTimes, label = "full profile")
+   
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+          ncol=3, fancybox=True, shadow=True)
 
-    p1 = plt.loglog(ncells, allTimes)      
+    
     plt.xlabel("ncell values")
     plt.ylabel("time")
-    p2 = plt.loglog(ncells, times)
-    plt.legend( (p1[0], p2[0]), ('Full Profile', fcnName) )
     plt.show()
+    #pass in list of function names
+   
+    #be able to pick out functions by cumulative or within one specific function
+    #split up example between setup and solve
+    #start using sumatra for storing profile data
