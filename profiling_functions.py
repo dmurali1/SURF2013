@@ -7,6 +7,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import inspect
 
 
 class FiPyProfile:
@@ -35,19 +36,37 @@ class FiPyProfile:
     def get_time_for_function(self, function_key, ncell):
         return self.get_stats(ncell).stats[function_key][3]
         
-    def get_key_from_function_name(self, function_name):
-        pass
+    def get_key_from_function_name(self, function_names):
+        for function_name in function_names:
+            for key in self.get_stats(ncell).fcn_list.keys():
+                if function_name in key[2]:
+                    return key
 
-    def get_key_from_function_pointer(self, function_pointer):
-        pass
+    def get_key_from_function_pointer(self, function_pointers):
+        for function_pointer in function_pointers:
+            from fipy.tools.numerix import function_pointer
+            pointer_key = (inspect.getfile(function_pointer), inspect.getsourcelines(function_pointer)[1], sum.func_name)
+        return pointer_key
 
-    def plot(self):
-        allTimes = []
-        for ncell in self.ncells:
-            print ncell,
-            allTimes.append(self.get_total_time(ncell))  
-
+    def plot(self, function_pointers=None):
+        keys = []
+        functionTimes = []
+        if function_pointers:
+            keys.append(self.get_key_from_fuction_pointer(function_pointers))
+            for key in keys:
+                for ncell in ncells:
+                    print ncell,
+                    functionTimes.append(get_time_for_function(key, ncell))
+            plt.loglog(self.ncells, functionTimes, label = fuction_pointers.func_name)           
+        else:
+            
+            allTimes = []
+            for ncell in self.ncells:
+                print ncell,
+                allTimes.append(self.get_total_time(ncell))  
+                
         plt.loglog(self.ncells, allTimes, label = "full profile")        
+
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                    ncol=3, fancybox=True, shadow=True)
 
