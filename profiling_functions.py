@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import inspect
+import matplotlib.gridspec as gridspec
 
 class FiPyProfile:
     def __init__(self, runfunc, ncells, regenerate=False):
@@ -41,28 +42,34 @@ class FiPyProfile:
         return (inspect.getfile(function_pointer), inspect.getsourcelines(function_pointer)[1], function_pointer.func_name)
 
     def plot(self, keys, field="cumulative"):
+
         stats = self.get_stats(self.ncells[0])
         sort_args = stats.get_sort_arg_defs()[field]
         index = sort_args[0][0][0]
 
+        fig = plt.figure()
+        gs = gridspec.GridSpec(3,3)
+        ax1 = plt.subplot(gs[1, :-1])
         for key in keys:
             functionTimes = []
             for ncell in self.ncells:
-              #  print ncell,
+                print ncell,
                 functionTimes.append(self.get_time_for_function(key, ncell, index))
-            plt.loglog(self.ncells, functionTimes, label = key[2])
-           # print key
+            a =  ax1.loglog(self.ncells, functionTimes, label = str(key[2][1:]))
+            print key[2]
 
         allTimes = []
         runfunc_key = self.get_key_from_function_pointer(self.runfunc)
         for ncell in self.ncells:
-          #  print ncell,
+            print ncell,
             allTimes.append(self.get_time_for_function(runfunc_key, ncell, index))  
-        plt.loglog(self.ncells, allTimes, label = "full profile")        
+        b = ax1.loglog(self.ncells, allTimes, label = "full profile")        
         plt.ylabel(sort_args[1])
         plt.xlabel("ncells")
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-                   ncol=3, fancybox=True, shadow=True)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 6})
+        gs.tight_layout(fig, rect=[0,0,1,1])
+ 
+     
 
 
 
