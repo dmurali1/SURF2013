@@ -33,40 +33,52 @@ class FiPyProfile:
         sorted_stats = self.get_stats(ncell).sort_stats(sort_field)
         return sorted_stats.fcn_list
 
-
+    
     def get_time_for_function(self, function_key, ncell, index=3):
-        return self.get_stats(ncell).stats[function_key][index]
+        """index = 3 refers to cumulative time"""
+        stats =  self.get_stats(ncell).stats
+        if function_key in stats:
+            return stats[function_key][index]
+        else:
+            return np.nan
 
     @staticmethod
     def get_key_from_function_pointer(function_pointer):
         return (inspect.getfile(function_pointer), inspect.getsourcelines(function_pointer)[1], function_pointer.func_name)
 
-    def plot(self, keys, field="cumulative"):
+    def plot(self, keys, field="cumulative", doFullProfile = True):
 
         stats = self.get_stats(self.ncells[0])
         sort_args = stats.get_sort_arg_defs()[field]
         index = sort_args[0][0][0]
 
         fig = plt.figure()
-        gs = gridspec.GridSpec(3,3)
+        gs = gridspec.GridSpec(2,1)
         ax1 = plt.subplot(gs[1, :-1])
         for key in keys:
             functionTimes = []
             for ncell in self.ncells:
                 print ncell,
                 functionTimes.append(self.get_time_for_function(key, ncell, index))
-            a =  ax1.loglog(self.ncells, functionTimes, label = str(key[2][1:]))
-            print key[2]
+            if key[0] == '~':
+                label = key[2]
+            else:
+                label = key[0] + ": " + key[2]
 
-        allTimes = []
-        runfunc_key = self.get_key_from_function_pointer(self.runfunc)
-        for ncell in self.ncells:
-            print ncell,
-            allTimes.append(self.get_time_for_function(runfunc_key, ncell, index))  
-        b = ax1.loglog(self.ncells, allTimes, label = "full profile")        
+            label = r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
+            a =  ax1.loglog(self.ncells, functionTimes, label = label)
+            print key[0], key[2]
+            
+        if doFullProfile:
+            allTimes = []
+            runfunc_key = self.get_key_from_function_pointer(self.runfunc)
+            for ncell in self.ncells:
+                print ncell,
+                allTimes.append(self.get_time_for_function(runfunc_key, ncell))
+            b = ax1.loglog(self.ncells, allTimes, label = "full profile")        
         plt.ylabel(sort_args[1])
         plt.xlabel("ncells")
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 6})
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
         gs.tight_layout(fig, rect=[0,0,1,1])
  
      
