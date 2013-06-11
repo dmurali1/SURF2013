@@ -2,11 +2,9 @@
 
 from fipy import *
 import numpy as np
+from simulation import Simulation
+class PolyxtalSimulation(Simulation):
 
-class PolyxtalSimulation:
-
-    def __init__(self):
-        pass
 
     def setup(self, ncell):
         dx = dy = 0.025
@@ -105,9 +103,7 @@ class PolyxtalSimulation:
             self.time_step()
             
             
-    def continue_steps(self):
-        for step in range(10):
-            self.time_step()
+
 
     def run(self, ncell=200**2):
         self.setup(ncell)
