@@ -10,19 +10,21 @@ import inspect
 import matplotlib.gridspec as gridspec
 
 class FiPyProfile:
-    def __init__(self, runfunc, ncells, regenerate=False):
+    def __init__(self, runfunc, funcString, ncells, regenerate=False):
         self.runfunc = runfunc
         self.ncells = ncells
         self.regenerate = regenerate
+        self.funcString = funcString
         for ncell in ncells:
             if not os.path.exists(self.datafilestring(ncell)) or self.regenerate:
                 self.profile(ncell)
 
     def datafilestring(self, ncell):
-        return "data/{runfunc}{ncell}.stats".format(runfunc=self.runfunc.func_name, ncell=ncell)
+        return "{funcString}{ncell}.stats".format(funcString=self.funcString, ncell=ncell)
 
     def profile(self, ncell):
-        print ncell
+
+        print ncell,
         runFuncString = 'self.runfunc(ncell={ncell})'.format(ncell=ncell)
         cProfile.runctx(runFuncString, globals(), locals(), filename=self.datafilestring(ncell))
         
@@ -46,7 +48,7 @@ class FiPyProfile:
     def get_key_from_function_pointer(function_pointer):
         return (inspect.getfile(function_pointer), inspect.getsourcelines(function_pointer)[1], function_pointer.func_name)
 
-    def plot(self, keys, field="cumulative", doFullProfile = True):
+    def plot(self, keys, field="cumulative"):
 
         stats = self.get_stats(self.ncells[0])
         sort_args = stats.get_sort_arg_defs()[field]
@@ -68,14 +70,7 @@ class FiPyProfile:
             label = r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
             a =  ax1.loglog(self.ncells, functionTimes, label = label)
             print key[0], key[2]
-            
-        if doFullProfile:
-            allTimes = []
-            runfunc_key = self.get_key_from_function_pointer(self.runfunc)
-            for ncell in self.ncells:
-                print ncell,
-                allTimes.append(self.get_time_for_function(runfunc_key, ncell))
-            b = ax1.loglog(self.ncells, allTimes, label = "full profile")        
+                   
         plt.ylabel(sort_args[1])
         plt.xlabel("ncells")
         plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
