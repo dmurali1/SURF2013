@@ -3,9 +3,10 @@
 from fipy import *
 import numpy as np
 from simulation import Simulation
+from memory_profiler import profile
 class PolyxtalSimulation(Simulation):
 
-
+   # @profile
     def setup(self, ncell):
         dx = dy = 0.025
         nx = ny = int(np.sqrt(ncell))
@@ -119,7 +120,13 @@ class PolyxtalSimulation(Simulation):
             e.solve(v, dt=self.dt)
         self.elapsed += self.dt
 
+
+def func():
+    polyxtal = PolyxtalSimulation()
+    polyxtal.run()   
    
 if __name__ == '__main__':
-    polyxtal = PolyxtalSimulation()
-    polyxtal.run()
+    from memory_profiler import LineProfiler
+    prof = LineProfiler()
+    func()
+    print prof.code_map

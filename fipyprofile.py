@@ -7,7 +7,7 @@ import inspect
 import matplotlib.gridspec as gridspec
 
 
-class FiPyProfile:
+class FiPyProfile(object):
     def __init__(self, runfunc, funcString, ncells, regenerate=False):
         self.runfunc = runfunc
         self.ncells = ncells
