@@ -1,0 +1,8 @@
+class A:
+    def method(self, x, y):
+        return x * y
+
+def func():
+    a = A()
+    out = a.method(1, 2)
+    print out
