@@ -121,9 +121,9 @@ class PolyxtalSimulation(Simulation):
         self.elapsed += self.dt
 
 
-def func():
+def func(ncell):
     polyxtal = PolyxtalSimulation()
-    polyxtal.run()   
+    polyxtal.run(ncell)   
    
 if __name__ == '__main__':
     from memory_profiler import LineProfiler
