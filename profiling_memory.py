@@ -1,55 +1,66 @@
-#make a memory class 
-#take memory profiler decorating fuction and put it in class
-#have ability to put decorator on function passed in
-from fipyprofile import FiPyProfile
-from memory_profiler import LineProfiler
 import matplotlib.pyplot as plt
-import pickle
-class FiPyProfileMemory(FiPyProfile):
-
-    def __init__(self, runfunc, funcString, ncells, regenerate=False):
-        self.code_map = dict()
-        super(FiPyProfileMemory, self).__init__(runfunc, funcString, ncells, regenerate)
-
-    def profile(self, ncell):
-
-        prof = LineProfiler()
-        prof(self.runfunc)(ncell)
-        print prof.code_map, ncell
-        f = open(self.datafilestring(ncell), "w")
-        pickle.dump(prof.code_map, f)
-        f.close()
-
-    def get_code_map(self, ncell):
-        f = open(self.datafilestring(ncell), "r")
-        out = pickle.load(f)
-        f.close()
-        return out
-
-    def datafilestring(self, ncell):
-        return "data/{funcString}{ncell}.txt".format(funcString=self.funcString, ncell=ncell)
-
-    def get_largest_value(self, ncell):
+from memory_profiler import LineProfiler
+ 
+ 
+class MemoryProfiler(object):
+    def __init__(self, profileMethod, runfunc):
+        self.profileMethod = profileMethod
+        cls = profileMethod.im_class
+        methString = profileMethod.func_name
+        setattr(cls, methString, self.decorate(getattr(cls, methString)))
+        self.runfunc = runfunc
+       
+    def decorate(self, func):
+        def wrapper(*args, **kwargs):
+            prof = LineProfiler()
+            out = prof(func)(*args, **kwargs)
+            self.codeMap = prof.code_map
+            return out
+        return wrapper
+ 
+    @property
+    def maxMemory(self):
         maxitem = 0
-        codemap = self.get_code_map(ncell)
-        print "regenerated", codemap.keys()
-        for value in codemap.values():
-            print value
+        for value in self.codeMap.values():
             for maxval in value.values():
                 maxitem = max(max(maxval), maxitem)
-            print maxitem
         return maxitem
-
-
+ 
+    def profile(self, *args, **kwargs):
+        self.runfunc(*args, **kwargs)
+ 
+       
+class MemoryViewer(object):
+    def __init__(self, memoryProfiler, ncells, regenerate=False):
+        self.ncells = ncells
+        self.memoryProfiler = memoryProfiler
+   
     def plot(self):
-        functionMemory = []
+        maxMemoryValues = []
         for ncell in self.ncells:
-            print ncell,
-            functionMemory.append(self.get_largest_value(ncell))
-        plt.loglog(self.ncells, functionMemory)
-        plt.loglog((10**4, 10**6), (10**2, 10**4))
+            self.memoryProfiler.profile(ncell)
+            maxMemoryValues.append(self.memoryProfiler.maxMemory)
+ 
+        plt.loglog(self.ncells, maxMemoryValues)
         plt.xlabel("ncells")
-        plt.ylabel("MB")
+        plt.ylabel("maximum memory values (MB)")
+ 
+ 
+if __name__ == '__main__':
+    import fipy as fp
+    from fipy.terms.term import Term
+    import numpy as np
+    
+    from polyxtal import PolyxtalSimulation
+    from polyxtal import func
 
-#figure out why maxitem is the same for all ncells
-#save data to a file so we don't have to regenerate each time 
+    def run(ncell):
+        m = fp.Grid1D(nx=ncell)
+        v = fp.CellVariable(mesh=m)
+        fp.DiffusionTerm().solve(v)
+ 
+    ncells = np.array(np.logspace(1, 5, 20), dtype=int)
+    memoryProfiler = MemoryProfiler(profileMethod=PolyxtalSimulation.setup, runfunc=func)
+    memoryViewer = MemoryViewer(memoryProfiler, ncells)
+    memoryViewer.plot()
+    plt.show()
