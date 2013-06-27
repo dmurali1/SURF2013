@@ -1,4 +1,4 @@
-#file: profiling_functions.py
+##file: profiling_functions.py
 from fipy import Grid1D, CellVariable, TransientTerm, DiffusionTerm, Viewer
 import cProfile
 import pstats 
@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 import math
 import inspect
 import matplotlib.gridspec as gridspec
+from fipyprofile import FiPyProfile
 
-class FiPyProfile:
+class FiPyProfileTime(FiPyProfile):
     def __init__(self, runfunc, ncells, regenerate=False):
         self.runfunc = runfunc
         self.ncells = ncells
@@ -53,8 +54,9 @@ class FiPyProfile:
         index = sort_args[0][0][0]
 
         fig = plt.figure()
-        gs = gridspec.GridSpec(2,1)
-        ax1 = plt.subplot(gs[1, :-1])
+       # gs = gridspec.GridSpec(2,1)
+       # ax1 = plt.subplot(gs[1, :-1])
+
         for key in keys:
             functionTimes = []
             for ncell in self.ncells:
@@ -66,7 +68,7 @@ class FiPyProfile:
                 label = key[0] + ": " + key[2]
 
             label = r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
-            a =  ax1.loglog(self.ncells, functionTimes, label = label)
+            plt.loglog(self.ncells, functionTimes, label = label)
             print key[0], key[2]
             
         if doFullProfile:
@@ -75,12 +77,18 @@ class FiPyProfile:
             for ncell in self.ncells:
                 print ncell,
                 allTimes.append(self.get_time_for_function(runfunc_key, ncell))
-            b = ax1.loglog(self.ncells, allTimes, label = "full profile")        
+            plt.loglog(self.ncells, allTimes, label = "full profile")        
         plt.ylabel(sort_args[1])
         plt.xlabel("ncells")
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
-        gs.tight_layout(fig, rect=[0,0,1,1])
- 
+       # plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
+       # gs.tight_layout(fig, rect=[0,0,1,1])
+        plt.plot(self.ncells, self.ncells**2, label="$ncells^2$")
+        plt.plot(self.ncells, self.ncells*np.log(self.ncells), label="$n\log(n)$")
+        plt.legend(loc=2)
+        plt.show() 
+      #  plt.savefig("Polyxtal_5_slowest.png")
+
+
      
 
 
