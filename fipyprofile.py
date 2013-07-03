@@ -13,9 +13,9 @@ class FiPyProfile(object):
         self.ncells = ncells
         self.regenerate = regenerate
         self.funcString = funcString
-        for ncell in ncells:
-            if not os.path.exists(self.datafilestring(ncell)) or self.regenerate:
-                self.profile(ncell)
+        # for ncell in ncells:
+        #     if not os.path.exists(self.datafilestring(ncell)) or self.regenerate:
+        #         self.profile(ncell)
 
     def datafilestring(self, ncell):
         return "{funcString}{ncell}.stats".format(funcString=self.funcString, ncell=ncell)

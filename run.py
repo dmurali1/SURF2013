@@ -4,10 +4,10 @@ from fipyprofile import FiPyProfile
 import numpy as np
 from coupled1D import CoupledSimulation
 
-ncells = np.array(np.logspace(1, 5, 25), dtype=int)
+ncells = np.array(np.logspace(1, 2, 2), dtype=int)
 polyxtal = PolyxtalSimulation()
 coupled = CoupledSimulation()
-prof = FiPyProfileTime(coupled.setup, ncells, regenerate=True)
-keys = prof.get_sorted_keys(ncells[-1], sort_field="time")
-prof.plot(keys[:0], "time", doFullProfile=True)
+prof = FiPyProfileTime(coupled.run, ncells, regenerate=True)
+keys = prof.get_sorted_keys(ncells[0], sort_field="cumulative")
+prof.plot(keys[:5], "cumulative", doFullProfile=True)
 

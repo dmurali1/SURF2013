@@ -8,6 +8,7 @@ class PolyxtalSimulation(Simulation):
 
    # @profile
     def setup(self, ncell):
+
         dx = dy = 0.025
         nx = ny = int(np.sqrt(ncell))
 

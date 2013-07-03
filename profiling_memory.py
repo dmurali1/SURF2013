@@ -34,24 +34,23 @@ class MemoryProfiler(object):
         return self.profileMethod.__name__
 
     #using the keys get the memory for a specified line
-    def getLineMemory(self, line):
-
-        print self.codeMap
-        raw_input("before keys")
-        
-        # mem =  self.codeMap.values()[0]
-        # max_mem = max(mem[line])
-        
-        keys = self.codeMap.values()[0].keys()
+    def getLineMemory(self, line=15):
 
         max_mem = 0
+        count = 1
+        keys = self.codeMap.values()[0].keys()
         breaker = True
         while breaker == True:
             if line in keys:
                 max_mem = max(self.codeMap.values()[0][line])
                 breaker = False
-            else: 
-                line = line + 1
+            else:
+                if count % 2 == 1:
+                    line = line + count
+                    count += 1
+                else:
+                    line = line - count
+                    count += 1
         return max_mem           
         
                  
@@ -68,7 +67,8 @@ class MemoryViewer(object):
         maxMemoryValues = []
         for ncell in self.ncells:
             self.memoryProfiler.profile(ncell)
-            maxMemoryValues.append(self.memoryProfiler.maxMemory)
+#            maxMemoryValues.append(self.memoryProfiler.maxMemory)
+            maxMemoryValues.append(self.memoryProfiler.getLineMemory)
         label = self.memoryProfiler.getMethodName()
         plt.loglog(self.ncells, maxMemoryValues, label=label)
     #    plt.loglog(self.ncells, self.ncells**2, label="$ncells^2$")
@@ -78,14 +78,7 @@ class MemoryViewer(object):
         plt.legend(loc=2)
  
 if __name__ == '__main__':
-    # import fipy as fp
-    # from fipy.terms.term import Term
-    # import numpy as np
-    # def run(ncell):
-    #     m = fp.Grid1D(nx=ncell)
-    #     v = fp.CellVariable(mesh=m)
-    #     fp.DiffusionTerm().solve(v)
- 
+
     from polyxtal import PolyxtalSimulation
     from polyxtal import func
 
@@ -97,6 +90,6 @@ if __name__ == '__main__':
     for ncell in ncells:
         memoryProfiler.profile(ncell)
     memoryViewer = MemoryViewer(memoryProfiler, ncells)
-    print memoryProfiler.getLineMemory(14)
-  #  memoryViewer.plot()
+    print memoryProfiler.getLineMemory(25)
+    memoryViewer.plot()
     plt.show()
