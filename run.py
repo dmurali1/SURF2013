@@ -11,3 +11,4 @@ prof = FiPyProfileTime(coupled.run, ncells, regenerate=True)
 keys = prof.get_sorted_keys(ncells[0], sort_field="cumulative")
 prof.plot(keys[:5], "cumulative", doFullProfile=True)
 
+"hi"
