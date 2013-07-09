@@ -4,6 +4,7 @@ from fipy import *
 import numpy as np
 from simulation import Simulation
 from memory_profiler import profile
+import gc
 class PolyxtalSimulation(Simulation):
 
    # @profile
@@ -11,7 +12,6 @@ class PolyxtalSimulation(Simulation):
 
         dx = dy = 0.025
         nx = ny = int(np.sqrt(ncell))
-
         mesh = Grid2D(dx=dx, dy=dy, nx=nx, ny=ny)
 
         dt = 5e-4
@@ -101,7 +101,8 @@ class PolyxtalSimulation(Simulation):
         self.q = q
         self.dt = dt
         self.elapsed = elapsed
-        for step in range(2):
+        for step in range(10):
+            gc.collect()
             self.time_step()
             
             

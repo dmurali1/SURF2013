@@ -54,8 +54,8 @@ class FiPyProfileTime(FiPyProfile):
         index = sort_args[0][0][0]
         
         fig = plt.figure()
-       # gs = gridspec.GridSpec(2,1)
-       # ax1 = plt.subplot(gs[1, :-1])
+        gs = gridspec.GridSpec(2,1)
+        ax1 = plt.subplot(gs[1, :-1])
 
       
         for key in keys:
@@ -73,7 +73,7 @@ class FiPyProfileTime(FiPyProfile):
                 label = fileName + ": " + key[2]
 
             label = r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
-            plt.loglog(self.ncells, functionTimes, label = label)
+            ax1.loglog(self.ncells, functionTimes, label = label)
             print key[0], key[2]
             
         if doFullProfile:
@@ -82,16 +82,16 @@ class FiPyProfileTime(FiPyProfile):
             for ncell in self.ncells:
                 print ncell,
                 allTimes.append(self.get_time_for_function(runfunc_key, ncell))
-            plt.loglog(self.ncells, allTimes, label = "full profile")        
+            ax1.loglog(self.ncells, allTimes, label = "full profile")        
         plt.ylabel(sort_args[1])
         plt.xlabel("ncells")
-       # plt.legend(bbox_to_anchor=(2, 1), loc=2, ncol=2, mode="wrap", borderaxespad=0., prop={'size': 12})
-       # gs.tight_layout(fig, rect=[0,0,1,1])
+      
+        gs.tight_layout(fig, rect=[0,0,1,1])
         plt.loglog(self.ncells, self.ncells**2, label="$ncells^2$")
         plt.loglog(self.ncells, self.ncells*np.log(self.ncells), label="$n\log(n)$")
-        plt.legend(loc="lower right", prop={'size': 10})
-      #  plt.show() 
-        plt.savefig("Polyxtal_5_slowest.png")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
+        plt.show() 
+      #  plt.savefig("Polyxtal_5_slowest.png")
 
 
      
