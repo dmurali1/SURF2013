@@ -102,7 +102,7 @@ class PolyxtalSimulation(Simulation):
         self.dt = dt
         self.elapsed = elapsed
         for step in range(10):
-            gc.collect()
+          
             self.time_step()
             
             
