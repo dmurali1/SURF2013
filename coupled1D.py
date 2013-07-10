@@ -32,6 +32,9 @@ class CoupledSimulation(Simulation):
         self.setup(ncell)
         self.continue_steps()
 
+def func(ncell):
+    coupled = CoupledSimulation()
+    coupled.run(ncell)
 
 
 if __name__ == '__main__':
