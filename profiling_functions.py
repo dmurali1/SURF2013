@@ -9,9 +9,10 @@ import math
 import inspect
 import matplotlib.gridspec as gridspec
 from fipyprofile import FiPyProfile
+import datetime
 
 class FiPyProfileTime(FiPyProfile):
-    def __init__(self, runfunc, ncells, regenerate=False):
+    def __init__(self, runfunc, ncells, regenerate=False, funcString=None):
         self.runfunc = runfunc
         self.ncells = ncells
         self.regenerate = regenerate
@@ -22,9 +23,17 @@ class FiPyProfileTime(FiPyProfile):
 
     def datafilestring(self, ncell):
         return "{funcString}{ncell}.stats".format(funcString=self.funcString, ncell=ncell)
+	# now = datetime.datetime.now() 
+        # year = now.year
+        # month = now.month
+        # day = now.day
+        # hour = now.hour
 
+        # dateString = "{month}-{day}-{year}_{hour}.stats".format(month=month, day=day, year=year, hour=hour)
+        # return dateString
+	#return str({now})[:16].replace(" ", "_")).stats.format(now=now)
+	
     def profile(self, ncell):
-
         print ncell,
         runFuncString = 'self.runfunc(ncell={ncell})'.format(ncell=ncell)
         cProfile.runctx(runFuncString, globals(), locals(), filename=self.datafilestring(ncell))
