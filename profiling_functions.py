@@ -21,7 +21,7 @@ class FiPyProfileTime(FiPyProfile):
             self.profile()
 
     def datafilestring(self):
-        return "{funcString}{ncell}.stats".format(funcString=self.funcString, ncell=self.ncell)
+        return "data/{funcString}{ncell}.stats".format(funcString=self.funcString, ncell=self.ncell)
 	# now = datetime.datetime.now() 
         # year = now.year
         # month = now.month
@@ -71,7 +71,6 @@ class ProfileViewer(object):
             functionTimes = []
             ncells = []
             for profiler in profilers:
-                print profiler.ncell,
                 ncells.append(profiler.ncell)
                 functionTimes.append(profiler.get_time_for_function(key, index))
             ncells = np.array(ncells)
@@ -87,13 +86,11 @@ class ProfileViewer(object):
 
             label = r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
             ax1.loglog(ncells, functionTimes, label = label)
-            print key[0], key[2]
             
         if doFullProfile:
             allTimes = []
             runfunc_key = profilers[0].get_key_from_function_pointer(profilers[0].runfunc)
             for profiler in profilers:
-                print profiler.ncell
                 allTimes.append(profiler.get_time_for_function(runfunc_key,))
             ax1.loglog(ncells, allTimes, label = "full profile")        
 
