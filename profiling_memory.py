@@ -94,7 +94,6 @@ class MemoryViewer(object):
     def plot(self, data):
         
         memoryValues = np.array(data).swapaxes(0,1)
-        print memoryValues.shape
         labels = ["Full Profile:" + self.profileMethod.__name__]
         labels += ["Line Profile:" + self.profileMethod.__name__ + " Line : " + str(l) for l in self.lines]
         
@@ -107,8 +106,8 @@ class MemoryViewer(object):
         plt.legend(loc="upper left")
         plt.show()
 
-       # plt.loglog(self.ncells, self.ncells**2, label="$ncells^2$")
-       # plt.loglog(self.ncells, self.ncells*np.log(self.ncells), label="nlogn")
+        plt.loglog(self.ncells, self.ncells**2, label="$ncells^2$")
+        plt.loglog(self.ncells, self.ncells*np.log(self.ncells), label="nlogn")
  
 # def getMemoryValues(self, profileMethod, runfunc, line, ncell):
 #     def worker(ncell, resultQ, lines, profileMethod, runfunc):

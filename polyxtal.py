@@ -101,9 +101,9 @@ class PolyxtalSimulation(Simulation):
         self.q = q
         self.dt = dt
         self.elapsed = elapsed
-        for step in range(10):
-          
-            self.time_step()
+     #   for step in range(10):
+        
+        self.time_step()
             
             
 
