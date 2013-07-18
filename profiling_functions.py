@@ -57,50 +57,49 @@ class FiPyProfileTime(FiPyProfile):
         return (inspect.getfile(function_pointer), inspect.getsourcelines(function_pointer)[1], function_pointer.func_name)
 
 class ProfileViewer(object):
-    def plot(self, profilers, keys, field="cumulative", doFullProfile = True, shortLabel = True):
-        stats = profilers[0].get_stats()
-        sort_args = stats.get_sort_arg_defs()[field]
-        index = sort_args[0][0][0]
-        
-        fig = plt.figure()
-        gs = gridspec.GridSpec(2,1)
-        ax1 = plt.subplot(gs[1, :-1])
-
-      
-        for key in keys:
-            functionTimes = []
-            ncells = []
-            for profiler in profilers:
-                ncells.append(profiler.ncell)
-                functionTimes.append(profiler.get_time_for_function(key, index))
-            ncells = np.array(ncells)
-
-            if key[0] == '~':
-                label = key[2]
+    def makelabel(self, key, shortLabel=True):
+        if key[0] == '~':
+            label = key[2]
+        else:
+            if shortLabel:
+                fileName = os.path.split(key[0])[1]
             else:
-                if shortLabel:
-                    fileName = os.path.split(key[0])[1]
-                else:
-                    fileName = key[0]
-                label = fileName + ": " + key[2]
+                fileName = key[0]
+            label = fileName + ": " + key[2]
 
-            label = r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
-            ax1.loglog(ncells, functionTimes, label = label)
+        return r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
+
+    def plot(self, profilers, keys, linetypes=None, labels=None, field="cumulative", ylabel=None):
+        sort_args = profilers[0].get_stats().get_sort_arg_defs()[field]
+        index = sort_args[0][0][0]
+          
+        fig = plt.figure()
+
+        if not linetypes:
+            linetypes = [None] * len(keys)
+
+        if not labels:
+            labels = [self.makelabel(k) for k in keys]
+
+        ncells = np.array([p.ncell for p in profilers])
+
+        for key, linetype, label in zip(keys, linetypes, labels):
+            times = [p.get_time_for_function(key, index) for p in profilers]
+            plt.loglog(ncells, times, linetype, label = label, lw=2)
             
-        if doFullProfile:
-            allTimes = []
-            runfunc_key = profilers[0].get_key_from_function_pointer(profilers[0].runfunc)
-            for profiler in profilers:
-                allTimes.append(profiler.get_time_for_function(runfunc_key,))
-            ax1.loglog(ncells, allTimes, label = "full profile")        
-
-        plt.ylabel(sort_args[1])
-        plt.xlabel("ncells")
+        if ylabel:
+            plt.ylabel(ylabel)
+        else:
+            plt.ylabel(sort_args[1])
+        plt.xlabel(r"$N$")
       
-        gs.tight_layout(fig, rect=[0,0,1,1])
-        plt.loglog(ncells, ncells**2, label="$ncells^2$")
-        plt.loglog(ncells, ncells*np.log(ncells), label="$n\log(n)$")
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
+        ncells = ncells[int(len(ncells) * (2. / 3.)):]
+        multiplier = times[-1] / ncells[-1]**2
+        plt.loglog(ncells, multiplier * ncells**2, label=r"$N^2$", lw=2)
+        multiplier = times[-1] / (ncells[-1]*np.log(ncells[-1]))
+        plt.loglog(ncells, multiplier * ncells*np.log(ncells), label=r"$N\log(N)$", lw=2)
+
+        plt.legend(loc='lower right')
         plt.show() 
       #  plt.savefig("Polyxtal_5_slowest.png")
 
