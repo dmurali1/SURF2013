@@ -76,6 +76,7 @@ class MemoryViewer(object):
             resultQ.put([m.maxMemory] + [m.getLineMemory(l) for l in lines])
         
         resultLists = []
+
         for ncell in self.ncells:
             resultQ = multiprocessing.Queue()
             process = multiprocessing.Process(target=worker, args=(ncell, resultQ, self.profileMethod, self.runfunc, self.lines))
@@ -94,21 +95,52 @@ class MemoryViewer(object):
     def plot(self, data):
         
         memoryValues = np.array(data).swapaxes(0,1)
-        labels = ["Full Profile:" + self.profileMethod.__name__]
-        labels += ["Line Profile:" + self.profileMethod.__name__ + " Line : " + str(l) for l in self.lines]
+       # labels = ["Full Profile:" + self.profileMethod.__name__]
+       # labels += ["Line Profile:" + self.profileMethod.__name__ + " Line : " + str(l) for l in self.lines]
         
-        for label, memory in zip(labels, memoryValues):
-            plt.loglog(self.ncells, memory, label=label)
+        #labels = ["Total Memory", "Before Mesh", "After Intermediate Variables", "Before Solver"]
+        plt.loglog(self.ncells, memoryValues[0], label="Total Memory")
+        plt.loglog(self.ncells, memoryValues[1], label="Before Mesh")
+        #plt.loglog(self.ncells, memoryValues[2], label="Before Intermediate Variables")
+        plt.loglog(self.ncells, memoryValues[3], label="Before Solve")
+        #for label, memory in zip(labels, memoryValues):
+        #    plt.loglog(self.ncells, memory, label=label)
 
+        plt.ylim(ymin=10.)
+        plt.loglog(self.ncells, 500. * 8. * self.ncells / 1024. / 1024., "k--", label=r"500$\times N \times$float64") 
+    
         plt.xlabel("ncells")
         plt.ylabel("maximum memory values (MB)")
         
         plt.legend(loc="upper left")
-        plt.show()
-
-        plt.loglog(self.ncells, self.ncells**2, label="$ncells^2$")
-        plt.loglog(self.ncells, self.ncells*np.log(self.ncells), label="nlogn")
+        plt.savefig("polyxtal_gmesh.png")
  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # def getMemoryValues(self, profileMethod, runfunc, line, ncell):
 #     def worker(ncell, resultQ, lines, profileMethod, runfunc):
 #         from profiling_memory import MemoryProfiler
@@ -171,4 +203,4 @@ if __name__ == '__main__':
     #memoryProfiler = MemoryProfiler(profileMethod=PolyxtalSimulation.setup, runfunc=func)
     #memoryViewer = MemoryViewer(memoryProfiler, ncells)
    
-    plt.show()
+

@@ -5,14 +5,23 @@ import numpy as np
 from simulation import Simulation
 from memory_profiler import profile
 import gc
+
+
+
 class PolyxtalSimulation(Simulation):
+
+    
+    def getMesh(self, dx, dy, nx, ny):
+        return Grid2D(dx, dy, nx, ny)
 
    # @profile
     def setup(self, ncell):
 
         dx = dy = 0.025
         nx = ny = int(np.sqrt(ncell))
-        mesh = Grid2D(dx=dx, dy=dy, nx=nx, ny=ny)
+
+        mesh = self.getMesh(dx=dx, dy=dy, nx=nx, ny=ny)
+
 
         dt = 5e-4
 
@@ -101,9 +110,8 @@ class PolyxtalSimulation(Simulation):
         self.q = q
         self.dt = dt
         self.elapsed = elapsed
-     #   for step in range(10):
-        
-        self.time_step()
+        for step in range(10):
+            self.time_step()
             
             
 
@@ -123,12 +131,23 @@ class PolyxtalSimulation(Simulation):
         self.elapsed += self.dt
 
 
+class PolyxtalSimulationGmsh(PolyxtalSimulation):
+    def getMesh(self, dx, dy, nx, ny):
+        return GmshGrid2D(dx, dy, nx, ny)
+
+
 def func(ncell):
     polyxtal = PolyxtalSimulation()
     polyxtal.run(ncell)   
+
+def func2(ncell):
+    polyxtal = PolyxtalSimulationGmsh()
+    polyxtal.run(ncell)
    
 if __name__ == '__main__':
     from memory_profiler import LineProfiler
     prof = LineProfiler()
     func()
     print prof.code_map
+
+ 

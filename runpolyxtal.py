@@ -23,9 +23,6 @@ files = ["data/data0_{ncell}_polyxtal".format(ncell=n) for n in ncells]
 data = memoryViewer.readdata(files)
 #memoryViewer.plot(data)
 
-
-
-
 def plot(data, lines, ncells):
     
     memoryValues4 = np.array(data).swapaxes(0,1)
@@ -39,24 +36,25 @@ def plot(data, lines, ncells):
     plt.legend(loc="upper left")
     plt.savefig("polyxtal_gmesh.png")
 
-def multiplot(data, data2, datalines, data2lines, ncells):
+def multiplot(data, data2, lines, ncells):
 
     memoryValues = np.array(data).swapaxes(0,1)
     memoryValues4 = np.array(data2).swapaxes(0,1)
 
-    plt.loglog(ncells, memoryValues[0], label="Total")
-    plt.loglog(ncells, memoryValues[1], label="Base")
-#    plt.loglog(ncells, memoryValues[4], label="After Solve")
+    plt.loglog(ncells, memoryValues[0], "k", label="Total", lw=3)
+    plt.loglog(ncells, memoryValues[1], "k", linestyle="dashdot", label="Base")
+    plt.loglog(ncells, memoryValues[3], "k--", label="Setup")
+    
 
-    #plt.loglog(ncells, memoryValues4[0], label="Total Gmsh Memory", lw=2)
-    plt.loglog(ncells, memoryValues4[2], label="After Gmsh Mesh", lw=2)
+    plt.loglog(ncells, memoryValues4[0], "r", label="Total (Gmsh)", lw=3)
+    plt.loglog(ncells, memoryValues4[2], "r--", label="Setup (Gmsh)")
   
 
     plt.ylim(ymin=10.)
-    plt.loglog(ncells, 500. * 8. * ncells / 1024. / 1024., "k--", label=r"500$\times N \times$float64") 
+    plt.loglog(ncells, 500. * 8. * ncells / 1024. / 1024., "b:", label=r"500$\times N \times$float64", lw=2) 
     
-    plt.xlabel("$N$")
-    plt.ylabel("Maximum Memory Values (MB)")
+    plt.xlabel("Number of Cells ($N$)")
+    plt.ylabel("Memory (MB)")
     plt.legend(loc="upper left")
     plt.savefig("polyxtal_gmesh")
     
