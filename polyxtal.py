@@ -128,7 +128,7 @@ def func(ncell):
     polyxtal.run(ncell)   
    
 if __name__ == '__main__':
-    from memory_profiler import LineProfiler
-    prof = LineProfiler()
+#    from memory_profiler import LineProfiler
+#    prof = LineProfiler()
     func()
-    print prof.code_map
+#    print prof.code_map
