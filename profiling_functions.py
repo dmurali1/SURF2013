@@ -10,6 +10,7 @@ import inspect
 import matplotlib.gridspec as gridspec
 from fipyprofile import FiPyProfile
 import datetime
+import time
 
 class FiPyProfileTime(FiPyProfile):
     def __init__(self, runfunc, ncell, regenerate=False, funcString=None):
@@ -18,7 +19,12 @@ class FiPyProfileTime(FiPyProfile):
         self.regenerate = regenerate
         self.funcString = funcString
         if not os.path.exists(self.datafilestring()) or self.regenerate:
+            print
+            print 'generate data for ',ncell
+            t0 = time.time()
             self.profile()
+            print 'time taken ',time.time() - t0
+            print
 
     def datafilestring(self):
         return "data/{funcString}{ncell}.stats".format(funcString=self.funcString, ncell=self.ncell)
@@ -56,6 +62,10 @@ class FiPyProfileTime(FiPyProfile):
     def get_key_from_function_pointer(function_pointer):
         return (inspect.getfile(function_pointer), inspect.getsourcelines(function_pointer)[1], function_pointer.func_name)
 
+    def getIndex(self, field):
+        sort_args = self.get_stats().get_sort_arg_defs()[field]
+        return sort_args[0][0][0]
+
 class ProfileViewer(object):
     def makelabel(self, key, shortLabel=True):
         if key[0] == '~':
@@ -69,11 +79,14 @@ class ProfileViewer(object):
 
         return r""+str(label).replace("_", "\_").replace("<", "$<$").replace(">", "$>$")
 
-    def plot(self, profilers, keys, linetypes=None, labels=None, field="cumulative", ylabel=None):
+    def getIndex(self, profiler):
         sort_args = profilers[0].get_stats().get_sort_arg_defs()[field]
-        index = sort_args[0][0][0]
+        return sort_args[0][0][0]
+
+    def plot(self, profilers, keys, linetypes=None, labels=None, field="cumulative", ylabel=None):
+        index = profilers[0].getIndex(field)
           
-        fig = plt.figure()
+        fig = plt.figure(figsize=(8, 6))
 
         if not linetypes:
             linetypes = [None] * len(keys)
@@ -91,20 +104,20 @@ class ProfileViewer(object):
             plt.ylabel(ylabel)
         else:
             plt.ylabel(sort_args[1])
-        plt.xlabel(r"$N$")
+        plt.xlabel(r"Number of Cells ($N$)")
       
         ncells = ncells[int(len(ncells) * (2. / 3.)):]
         multiplier = times[-1] / ncells[-1]**2
         plt.loglog(ncells, multiplier * ncells**2, label=r"$N^2$", lw=2)
         multiplier = times[-1] / (ncells[-1]*np.log(ncells[-1]))
-        plt.loglog(ncells, multiplier * ncells*np.log(ncells), label=r"$N\log(N)$", lw=2)
+        plt.loglog(ncells, multiplier * ncells*np.log(ncells),'b:', label=r"$N\log(N)$", lw=4)
 
         plt.legend(loc='lower right')
-        plt.show() 
-      #  plt.savefig("Polyxtal_5_slowest.png")
 
-
-     
+    def show(self):
+        plt.legend(loc='lower right')
+       # plt.show()
+        plt.savefig("extremefill_time_danya.png")
 
 
 
