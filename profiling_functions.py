@@ -52,6 +52,7 @@ class FiPyProfileTime(FiPyProfile):
     
     def get_time_for_function(self, function_key, index=3):
         """index = 3 refers to cumulative time"""
+
         stats =  self.get_stats().stats
         if function_key in stats:
             return stats[function_key][index]
