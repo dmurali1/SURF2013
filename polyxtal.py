@@ -5,14 +5,23 @@ import numpy as np
 from simulation import Simulation
 from memory_profiler import profile
 import gc
+import time
+
 class PolyxtalSimulation(Simulation):
+
+    def __init__(self, steps=10):
+        self.steps = steps
+
+    def getMesh(self, *args, **kwargs):
+        return Grid2D(*args, **kwargs)
 
    # @profile
     def setup(self, ncell):
 
         dx = dy = 0.025
         nx = ny = int(np.sqrt(ncell))
-        mesh = Grid2D(dx=dx, dy=dy, nx=nx, ny=ny)
+        mesh = self.getMesh(dx=dx, dy=dy, nx=nx, ny=ny)
+#        mesh = Grid2D()
 
         dt = 5e-4
 
@@ -25,6 +34,7 @@ class PolyxtalSimulation(Simulation):
 
 
         DT = 2.25
+
         q = Variable(0.)
         T_0 = -0.1
         heatEq = (TransientTerm()
@@ -101,16 +111,23 @@ class PolyxtalSimulation(Simulation):
         self.q = q
         self.dt = dt
         self.elapsed = elapsed
-        for step in range(10):
-          
-            self.time_step()
-            
-            
+        self.solvers = self.getSolvers()
 
+        for step in range(2):
+            self.time_step()
+
+        self.main_steps()
+            
+    def main_steps(self):
+        for step in range(self.steps):
+            time_before = time.time()
+            self.time_step()
+            time_after = time.time()
+            print "elapsed time:", time_after - time_before
 
     def run(self, ncell=200**2):
         self.setup(ncell)
-        self.continue_steps()
+#        self.continue_steps()
         
     def time_step(self):
         if self.elapsed > 0.3:
@@ -118,17 +135,58 @@ class PolyxtalSimulation(Simulation):
         for v in self.variables:
             v.updateOld()
 
-        for v, e in zip(self.variables, self.eqns):
-            e.solve(v, dt=self.dt)
+        for v, e, s in zip(self.variables, self.eqns, self.solvers):
+            if s:
+                e.solve(v, dt=self.dt, solver=s)
+            else:
+                e.solve(v, dt=self.dt)
+                
         self.elapsed += self.dt
 
+    def getSolvers(self):
+        return [None] * len(self.eqns)
 
-def func(ncell):
-    polyxtal = PolyxtalSimulation()
-    polyxtal.run(ncell)   
+class PolyxtalSimulationPysparse(PolyxtalSimulation):
+    pass
+
+class PolyxtalSimulationPysparseNoPrecon(PolyxtalSimulation):
+    def getSolvers(self):
+        from fipy.solvers.pysparse.linearPCGSolver import LinearPCGSolver
+        return [LinearPCGSolver(precon=None)] * len(self.eqns)
+
+class PolyxtalSimulationTrilinos(PolyxtalSimulation):
+    def getSolvers(self):
+        from fipy.solvers.trilinos.linearPCGSolver import LinearPCGSolver
+        return [LinearPCGSolver()] * len(self.eqns)
+
+class PolyxtalSimulationTrilinosNoPrecon(PolyxtalSimulation):
+    def getSolvers(self):
+        from fipy.solvers.trilinos.linearPCGSolver import LinearPCGSolver
+        return [LinearPCGSolver(precon=None)] * len(self.eqns)
+
+class PolyxtalSimulationTrilinosJacobi(PolyxtalSimulation):
+    def getSolvers(self):
+        from fipy.solvers.trilinos.linearPCGSolver import LinearPCGSolver
+        from fipy.solvers.trilinos.preconditioners import JacobiPreconditioner
+        return [LinearPCGSolver(precon=JacobiPreconditioner())] * len(self.eqns)
+
+
+class PolyxtalSimulationTrilinosJacobiGmsh(PolyxtalSimulation):
+    def getSolvers(self):
+        from fipy.solvers.trilinos.linearPCGSolver import LinearPCGSolver
+        from fipy.solvers.trilinos.preconditioners import JacobiPreconditioner
+        return [LinearPCGSolver(precon=JacobiPreconditioner())] * len(self.eqns)
+
+    def getMesh(self, *args, **kwargs):
+        return GmshGrid2D(*args, **kwargs)
+
+
+class PolyxtalSimulationPysparseJacobi(PolyxtalSimulation):
+    def getSolvers(self):
+        from fipy.solvers.pysparse.linearPCGSolver import LinearPCGSolver
+        from fipy.solvers.pysparse.preconditioners import JacobiPreconditioner
+        return [LinearPCGSolver(precon=JacobiPreconditioner())] * len(self.eqns)
+
+def runfunc(ncell, simclass):
+    simclass.run()
    
-if __name__ == '__main__':
-    from memory_profiler import LineProfiler
-    prof = LineProfiler()
-    func()
-    print prof.code_map
