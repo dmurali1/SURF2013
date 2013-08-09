@@ -8,15 +8,6 @@ from fipy.solvers.trilinos.trilinosSolver import TrilinosSolver
 from fipy.solvers.trilinos.trilinosAztecOOSolver import TrilinosAztecOOSolver
 
 
-ncells = np.array(np.logspace(1, 6, 25), dtype=int)
-polyxtal = PolyxtalSimulation()
-
-profilers = [FiPyProfileTime(polyxtal, ncell, regenerate=False, funcString='polyxtal_pysparse_2') for ncell in ncells]
-field = "cumulative"
-prof = profilers[0]
-
-
-raw_input("Stop.")
 ncells = np.array(np.logspace(2, 5, 10), dtype=int)
 polyxtal = PolyxtalSimulation()
 polyxtaltrilinos = PolyxtalSimulationPCG()

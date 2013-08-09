@@ -63,7 +63,6 @@ class FiPyProfileTime(FiPyProfile):
     def get_key_from_function_pointer(function_pointer):
         return (inspect.getfile(function_pointer), inspect.getsourcelines(function_pointer)[1], function_pointer.func_name)
 
-
     def getIndex(self, field):
         sort_args = self.get_stats().get_sort_arg_defs()[field]
         return sort_args[0][0][0]
@@ -117,11 +116,37 @@ class ProfileViewer(object):
 
         plt.legend(loc='lower right')
 
+    def show1(self):
+
+        plt.legend(loc='upper left')
+        
+       # plt.show()
+        plt.savefig("TESTING1.png")
+
     def show(self):
         plt.legend(loc='lower right')
        # plt.show()
         plt.savefig("extremefill_time_danya.png")
 
 
+    def show2(self):
 
+        plt.legend(loc='upper left')
+        
+       # plt.show()
+        plt.savefig("TESTING2.png")
+
+    def show3(self):
+
+        plt.legend(loc='upper left')
+        
+       # plt.show()
+        plt.savefig("TESTING3.png")
+
+    def show4(self):
+
+        plt.legend(loc='upper left')
+        
+       # plt.show()
+        plt.savefig("TESTING4.png")
 
