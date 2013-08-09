@@ -7,6 +7,7 @@ from fipy.solvers.pysparse.pysparseSolver import PysparseSolver
 from fipy.solvers.trilinos.trilinosSolver import TrilinosSolver
 from fipy.solvers.trilinos.trilinosAztecOOSolver import TrilinosAztecOOSolver
 
+
 ncells = np.array(np.logspace(2, 5, 10), dtype=int)
 polyxtal = PolyxtalSimulation()
 polyxtaltrilinos = PolyxtalSimulationPCG()

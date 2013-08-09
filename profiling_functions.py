@@ -52,6 +52,7 @@ class FiPyProfileTime(FiPyProfile):
     
     def get_time_for_function(self, function_key, index=3):
         """index = 3 refers to cumulative time"""
+        
         stats =  self.get_stats().stats
         if function_key in stats:
             return stats[function_key][index]
@@ -74,6 +75,7 @@ class ProfileViewer(object):
             if shortLabel:
                 fileName = os.path.split(key[0])[1]
             else:
+
                 fileName = key[0]
             label = fileName + ": " + key[2]
 
@@ -121,6 +123,10 @@ class ProfileViewer(object):
        # plt.show()
         plt.savefig("TESTING1.png")
 
+    def show(self):
+        plt.legend(loc='lower right')
+       # plt.show()
+        plt.savefig("extremefill_time_danya.png")
 
 
     def show2(self):

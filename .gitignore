@@ -1,8 +1,17 @@
 *.pyc
 *~
+<<<<<<< HEAD
 images/
 \#*
 .\#*
 .~*
 tmp/
 data/
+=======
+data/
+\#*
+.\#*
+images/
+tmp/
+.nfs*
+>>>>>>> master

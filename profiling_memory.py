@@ -13,6 +13,7 @@ class MemoryProfiler(object):
         setattr(cls, methString, self.decorate(getattr(cls, methString)))
         self.runfunc = runfunc
         self.codeMap = dict()
+        
        
     def decorate(self, func):
         def wrapper(*args, **kwargs):
@@ -61,73 +62,132 @@ class MemoryProfiler(object):
         self.runfunc(*args, **kwargs)
 
 class MemoryViewer(object):
-    def __init__(self, ncells, regenerate=False):
+    def __init__(self, ncells, profileMethod, runfunc, lines, regenerate=False):
         self.ncells = ncells
+        self.profileMethod = profileMethod
+        self.runfunc = runfunc
+        self.lines = lines
 
-    # def getMemoryValues(self, profileMethod, runfunc, line, ncell):
-    #     def worker(ncell, resultQ, lines, profileMethod, runfunc):
-    #         from profiling_memory import MemoryProfiler
-    #         m = MemoryProfiler(profileMethod, runfunc)
-    #         m.profile(ncell)
-    #         resultQ.put([m.maxMemory] + [m.getLineMemory(l) for l in lines])
-
-    #     resultQ = multiprocessing.Queue()
-    #     process = multiprocessing.Process(target=worker, args=(ncell, resultQ, (line,), profileMethod, runfunc))
-    #     process.start()
-    #     resultList = resultQ.get()
-    #     return resultList[0], resultList[1]
-
-    # def getMemoryList(self, profileMethod, runfunc, line, ncells):
-    #     return [self.getMemoryValues(profileMethod, runfunc, line, ncell) for ncell in ncells]
-
-    # def calcAndPlot(self, profileMethod, runfunc, line, ncells):
-    #     a = np.array(self.getMemoryList(profileMethod, runfunc, line, ncells))
-    #     lineMemoryValues, allMemory = np.swapaxes(a, 1, 0)
-    #     self.plot(lineMemoryValues, allMemory, profileMethod, line, ncells)
-
-    def plot(self, profileMethod, runfunc, line):
-        
-        fig = plt.figure()
-        gs = gridspec.GridSpec(2,1)
-        ax1 = plt.subplot(gs[1, :-1])
-
-        lineMemoryValues = []
-        allMemory = []
-
-        def worker(ncell, resultQ, lines, profileMethod, runfunc):
+    def generateData(self):
+        def worker(ncell, resultQ, profileMethod, runfunc, lines):
             from profiling_memory import MemoryProfiler
             m = MemoryProfiler(profileMethod, runfunc)
             m.profile(ncell)
             resultQ.put([m.maxMemory] + [m.getLineMemory(l) for l in lines])
         
-        
+        resultLists = []
+
         for ncell in self.ncells:
             resultQ = multiprocessing.Queue()
-            process = multiprocessing.Process(target=worker, args=(ncell, resultQ, (line,), profileMethod, runfunc))
+            process = multiprocessing.Process(target=worker, args=(ncell, resultQ, self.profileMethod, self.runfunc, self.lines))
             process.start()
-            resultList = resultQ.get()
-            lineMemoryValues.append(resultList[1])
-            allMemory.append(resultList[0])
-           # raw_input("stop")
+            results = resultQ.get()
+            resultLists.append(results)
+        return resultLists
 
-        label = "Line Profile:" + profileMethod.__name__ + " Line : " + str(line)
-        print lineMemoryValues
-        ax1.loglog(self.ncells, lineMemoryValues, label=label)
+    def savedata(self, listOfResults, datafiles):
+        for r, d in zip(listOfResults, datafiles):
+            np.savetxt(d, r)
+        
+    def readdata(self, datafiles):
+        return [np.loadtxt(d) for d in datafiles]
 
-        label = "Full Profile:" + profileMethod.__name__
-        print allMemory
-        ax1.loglog(self.ncells, allMemory, label=label)
+    def plot(self, data):
+        
+        memoryValues = np.array(data).swapaxes(0,1)
+       # labels = ["Full Profile:" + self.profileMethod.__name__]
+       # labels += ["Line Profile:" + self.profileMethod.__name__ + " Line : " + str(l) for l in self.lines]
+        
+        #labels = ["Total Memory", "Before Mesh", "After Intermediate Variables", "Before Solver"]
+        plt.loglog(self.ncells, memoryValues[0], label="Total Memory")
+        plt.loglog(self.ncells, memoryValues[1], label="Before Mesh")
+        #plt.loglog(self.ncells, memoryValues[2], label="Before Intermediate Variables")
+        plt.loglog(self.ncells, memoryValues[3], label="Before Solve")
+        #for label, memory in zip(labels, memoryValues):
+        #    plt.loglog(self.ncells, memory, label=label)
+
+        plt.ylim(ymin=10.)
+        plt.loglog(self.ncells, 500. * 8. * self.ncells / 1024. / 1024., "k--", label=r"500$\times N \times$float64") 
+    
         plt.xlabel("ncells")
         plt.ylabel("maximum memory values (MB)")
         
-        gs.tight_layout(fig, rect=[0,0,1,1])
-       # plt.loglog(self.ncells, self.ncells**2, label="$ncells^2$")
-       # plt.loglog(self.ncells, self.ncells*np.log(self.ncells), label="nlogn")
-        plt.xlabel("ncells")
-        plt.ylabel("maximum memory values (MB)")
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
-        plt.show()
+        plt.legend(loc="upper left")
+        plt.savefig("polyxtal_gmesh.png")
  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def getMemoryValues(self, profileMethod, runfunc, line, ncell):
+#     def worker(ncell, resultQ, lines, profileMethod, runfunc):
+#         from profiling_memory import MemoryProfiler
+#         m = MemoryProfiler(profileMethod, runfunc)
+#         m.profile(ncell)
+#         resultQ.put([m.maxMemory] + [m.getLineMemory(l) for l in lines])
+
+#     resultQ = multiprocessing.Queue()
+#     process = multiprocessing.Process(target=worker, args=(ncell, resultQ, (line,), profileMethod, runfunc))
+#     process.start()
+#     resultList = resultQ.get()
+#     return resultList[0], resultList[1]
+
+# def getMemoryList(self, profileMethod, runfunc, line, ncells):
+#     return [self.getMemoryValues(profileMethod, runfunc, line, ncell) for ncell in ncells]
+
+# def calcAndPlot(self, profileMethod, runfunc, line, ncells):
+#     a = np.array(self.getMemoryList(profileMethod, runfunc, line, ncells))
+#     lineMemoryValues, allMemory = np.swapaxes(a, 1, 0)
+#     self.plot(lineMemoryValues, allMemory, profileMethod, line, ncells)
+    # def plotIP(self, data):
+    #     fig = plt.figure()
+    #     gs = gridspec.GridSpec(2,1)
+    #     ax1 = plt.subplot(gs[1, :-1])
+        
+    #     allMemory, lineMemoryValues = np.array(data).swapaxes(0,1)
+
+    #     label = "Line Profile:" + self.profileMethod.__name__ + " Line : " + str(lines)
+    #     print lineMemoryValues
+    #     ax1.loglog(self.ncells, lineMemoryValues, label=label)
+
+    #     label = "Full Profile:" + methodName
+    #     print allMemory
+    #     ax1.loglog(self.ncells, allMemory, label=label)
+    #     plt.xlabel("ncells")
+    #     plt.ylabel("maximum memory values (MB)")
+        
+    #     gs.tight_layout(fig, rect=[0,0,1,1])
+    #    # plt.loglog(self.ncells, self.ncells**2, label="$ncells^2$")
+    #    # plt.loglog(self.ncells, self.ncells*np.log(self.ncells), label="nlogn")
+    #     plt.xlabel("ncells")
+    #     plt.ylabel("maximum memory values (MB)")
+    #     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, ncol=1, mode="wrap", borderaxespad=0., prop={'size': 12})
+ 
+    #     gs.tight_layout(fig, rect=[0,0,1,1])
+    #     plt.show()
+
 if __name__ == '__main__':
 
     from polyxtal import PolyxtalSimulation
@@ -143,4 +203,4 @@ if __name__ == '__main__':
     #memoryProfiler = MemoryProfiler(profileMethod=PolyxtalSimulation.setup, runfunc=func)
     #memoryViewer = MemoryViewer(memoryProfiler, ncells)
    
-    plt.show()
+

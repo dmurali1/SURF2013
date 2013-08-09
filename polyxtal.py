@@ -5,9 +5,16 @@ import numpy as np
 from simulation import Simulation
 from memory_profiler import profile
 import gc
+
 import time
 
 class PolyxtalSimulation(Simulation):
+    def __init__(self, steps=10):
+        self.steps = steps
+
+    
+    def getMesh(self, dx, dy, nx, ny):
+        return Grid2D(dx, dy, nx, ny)
 
     def __init__(self, steps=10):
         self.steps = steps
@@ -21,7 +28,6 @@ class PolyxtalSimulation(Simulation):
         dx = dy = 0.025
         nx = ny = int(np.sqrt(ncell))
         mesh = self.getMesh(dx=dx, dy=dy, nx=nx, ny=ny)
-#        mesh = Grid2D()
 
         dt = 5e-4
 
@@ -111,6 +117,7 @@ class PolyxtalSimulation(Simulation):
         self.q = q
         self.dt = dt
         self.elapsed = elapsed
+<<<<<<< HEAD
         self.solvers = self.getSolvers()
 
         for step in range(2):
@@ -124,7 +131,19 @@ class PolyxtalSimulation(Simulation):
             self.time_step()
             time_after = time.time()
             print "elapsed time:", time_after - time_before
+=======
 
+        self.solvers = self.getSolvers()
+
+        for step in range(self.steps):
+            print 'step',step
+            time_before = time.time()
+>>>>>>> master
+
+            self.time_step()
+            time_after = time.time()
+            print "elapsed time:", time_after - time_before
+            
     def run(self, ncell=200**2):
         self.setup(ncell)
 #        self.continue_steps()
@@ -144,7 +163,11 @@ class PolyxtalSimulation(Simulation):
         self.elapsed += self.dt
 
     def getSolvers(self):
+<<<<<<< HEAD
         return [None] * len(self.eqns)
+=======
+        return [None] * len(self.eqs)
+>>>>>>> master
 
 class PolyxtalSimulationPysparse(PolyxtalSimulation):
     pass
@@ -169,7 +192,6 @@ class PolyxtalSimulationTrilinosJacobi(PolyxtalSimulation):
         from fipy.solvers.trilinos.linearPCGSolver import LinearPCGSolver
         from fipy.solvers.trilinos.preconditioners import JacobiPreconditioner
         return [LinearPCGSolver(precon=JacobiPreconditioner())] * len(self.eqns)
-
 
 class PolyxtalSimulationTrilinosJacobiGmsh(PolyxtalSimulation):
     def getSolvers(self):
