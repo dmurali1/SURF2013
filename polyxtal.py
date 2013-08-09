@@ -187,6 +187,10 @@ class PolyxtalSimulationPysparseJacobi(PolyxtalSimulation):
         from fipy.solvers.pysparse.preconditioners import JacobiPreconditioner
         return [LinearPCGSolver(precon=JacobiPreconditioner())] * len(self.eqns)
 
+class PolyxtalSimulationGmsh(PolyxtalSimulation):
+    def getMesh(self, *args, **kwargs):
+        return GmshGrid2D(*args, **kwargs)
+
 def runfunc(ncell, simclass):
     simclass.run()
    
