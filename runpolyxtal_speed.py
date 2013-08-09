@@ -15,12 +15,12 @@ if args.trilinos:
 
 from fipyprofile import FiPyProfile
 from profiling_functions import FiPyProfileTime
-from polyxtal import PolyxtalSimulation, PolyxtalSimulationPysparseNoPrecon, PolyxtalSimulationTrilinosNoPrecon
+from polyxtal import PolyxtalSimulation, PolyxtalSimulationPCG
 from profiling_functions import ProfileViewer
         
 ncells = np.array(np.logspace(2, 5, 10), dtype=int)
-polyxtal = PolyxtalSimulationTrilinosNoPrecon()
-profilers = [FiPyProfileTime(polyxtal.run, ncell, regenerate=True, funcString='polyxtal_trilinos_noPrecon1') for ncell in ncells]
+polyxtal = PolyxtalSimulation()
+profilers = [FiPyProfileTime(polyxtal.run, ncell, regenerate=True, funcString='polyxtal_pysparse_2') for ncell in ncells]
 runkey = profilers[0].get_key_from_function_pointer(polyxtal.run)
 keys = [runkey,]
 viewer = ProfileViewer()
