@@ -1,6 +1,6 @@
-## SURF 2013 ##
+## SURF 2013 
 
-# Project Description #
+# Project Description 
 
 This project was on creating speed and memory profiling tools to analyze and optimize FiPy. FiPy is a partial differential equation (PDE) solver that uses the Finite Volume Method to solve PDEs. FiPy is written in the scripting language Python because Python is a very intutive and user-friendly language with many numerical computing packages which  make implementing PDEs easier. 
 
