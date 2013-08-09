@@ -1,26 +1,15 @@
-import numpy as np
-import matplotlib.pyplot as plt
+def plot(data, lines, ncells, datafile='out.png'):
+    
+    memoryValues4 = np.array(data).swapaxes(0,1)
+        
+    for label, memory in zip(lines, memoryValues4):
+        plt.loglog(ncells, memory, label=label)
 
-def plot(datadict, ncells, datafile='out.png'):
-    
-   
-    for k in datadict.keys():
-        d = datadict[k]
-        plt.loglog(ncells, d['values'], d['linecolor'], label=d['label'], linestyle=d['linetype'], lw=2)
-    
-    plt.ylim(ymin=10.)
-    plt.loglog(ncells, 500. * 8. * ncells / 1024. / 1024., "b:", label=r"500$\times N \times$float64", lw=2) 
-    
-    # plt.loglog(ncells, memoryValues[0], "k", label=labels[0], lw=2)
-    # plt.loglog(ncells, memoryValues[1], "k", linestyle="dotdash", label=labels[1])
-    # plt.loglog(ncells, memoryValues[3], label=labels[2])
-   
-
-    plt.xlabel("Number of Cells ($N$)")
-    plt.ylabel("Memory (MB)")
+    plt.xlabel("ncells")
+    plt.ylabel("maximum memory values (MB)")
     
     plt.legend(loc="upper left")
-    plt.savefig(datafile)
+    plt.savefig('out.png')
 
 def multiplot(data, data2, datalines, data2lines, ncells):
 
